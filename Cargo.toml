@@ -1,0 +1,26 @@
+[package]
+name = "rocket_mo"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = "0.11.22"
+config = "0.13.3"
+serde="*"
+futures="*"
+serde_json = "*"
+chrono = "0.4.10"
+bson = { version = "2.3.0",features = ["chrono-0_4"] }
+jsonwebtoken = "8.1.1"
+dotenvy = "0.15"
+
+[dependencies.mongodb]
+version = "2.7.0"
+default-features = false
+features = ["async-std-runtime"]
+
+[dependencies.rocket]
+version = "=0.5.0-rc.3"
+features = ["json"]
