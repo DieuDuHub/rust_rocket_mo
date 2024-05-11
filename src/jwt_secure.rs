@@ -60,7 +60,7 @@ impl<'r> FromRequest<'r> for JWT {
 }
 
     fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
-        let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
+        //let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
         let token = token.trim_start_matches("Bearer").trim();
 
         let mut pem = Vec::new();
