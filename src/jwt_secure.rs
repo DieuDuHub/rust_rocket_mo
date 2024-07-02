@@ -2,12 +2,11 @@ use rocket::Responder;
 
 use rocket::serde::{Deserialize, Serialize};
 
-use chrono::Utc;
 use jsonwebtoken::{encode, decode, DecodingKey, Algorithm, Header, Validation}; // 👈 New!
 use jsonwebtoken::errors::{Error, ErrorKind};
-use std::env;
+
 use std::fs::File;
-use dotenvy::dotenv;
+
 use std::io::Read;
 //use shared::response_models::{Response, ResponseBody, NetworkResponse}; // 👈 New!
 use rocket::request::{Outcome, Request, FromRequest}; // 👈 New!

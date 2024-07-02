@@ -199,7 +199,15 @@ async fn get_all_any(
         Ok(key) => key,
         Err(err) => {
             //println!("Error init connection server api {}", err.);
-            return Err(Status::BadRequest);
+            //return Err(Status::BadRequest);
+            match (err) {
+                NetworkResponse::Unauthorized(e) => {
+                    return Err(Status::Unauthorized);
+                },
+                _ => {
+                    return Err(Status::BadRequest);
+                }
+            }
         },
     };
 

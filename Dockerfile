@@ -70,6 +70,7 @@ COPY --from=builder /rocket_mo/Rocket.toml .
 USER myip:myip
 
 COPY ./wait-for-it.sh /rocket_mo/wait-for-it.sh
+COPY ./rsapk.pem /rocket_mo/./rsapk.pem
 
 #CMD ["/rocket_mo/rocket_mo"]
 
