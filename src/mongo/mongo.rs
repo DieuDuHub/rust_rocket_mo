@@ -8,6 +8,7 @@ use mongodb::{
 };
 
 use crate::models::user_model::User;
+use std::env;
 
 /// Collection structure to CRUD User object
 /// MongoDb shared connection
@@ -22,7 +23,18 @@ pub struct MongoRepo {
 /// Initialize DB object containings the tested, alive mongodb::Client instance
 ///
 pub async fn init_connection(uri: String) -> Option<MongoRepo> {
-    let mut client_options = match ClientOptions::parse(uri).await {
+
+    let o = match env::var("DB_URL") {
+        Ok(o) => format!("{}{}","mongodb://",o),
+        Err(e) => {
+            println!("No DB_URL variable collectiong DB_URL from Config Server. {}", e.to_string());
+            uri
+        }
+    };
+
+    println!("URI : {}", &o);
+
+    let mut client_options = match ClientOptions::parse(o).await {
         Ok(o) => o,
         Err(e) => {
             println!("Error init connection client options {}", e.to_string());

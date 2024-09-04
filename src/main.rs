@@ -281,7 +281,7 @@ async fn main() -> Result<(), rocket::Error> {
         Ok(o) => o,
         Err(e) => format!("Error ping db get Key return error: {}", e.to_string()),
     };
-    println!("URI : {}", uri);
+    
     let repo: MongoRepo = match mongo::mongo::init_connection(uri).await {
         Some(o) => o,
         None => {
