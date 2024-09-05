@@ -11,10 +11,23 @@ use std::io::Read;
 //use shared::response_models::{Response, ResponseBody, NetworkResponse}; // 👈 New!
 use rocket::request::{Outcome, Request, FromRequest}; // 👈 New!
 use rocket::http::Status;
+use reqwest::get;
+use std::env;
 
 #[derive(Debug)]
 pub struct JWT {
     pub claims: Claims
+}
+
+#[derive(Deserialize,Debug)]
+struct Jwk {
+    n: String,
+    e: String,
+}
+
+#[derive(Deserialize,Debug)]
+struct JwkSet {
+    keys: Vec<Jwk>,
 }
 
 #[rocket::async_trait]
@@ -22,8 +35,8 @@ impl<'r> FromRequest<'r> for JWT {
     type Error = NetworkResponse;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, NetworkResponse> {
-        fn is_valid(key: &str) -> Result<Claims, Error> {
-            Ok(decode_jwt(String::from(key))?)
+        async fn is_valid(key: &str) -> Result<Claims, Error> {
+            Ok(decode_jwt(String::from(key)).await?)
         }
 
         match req.headers().get_one("authorization") {
@@ -33,7 +46,7 @@ impl<'r> FromRequest<'r> for JWT {
                 println!("Error validating JWT token - No token provided");
                 Outcome::Failure((Status::Unauthorized, NetworkResponse::Unauthorized(serde_json::to_string(&response).unwrap())))
             },
-            Some(key) => match is_valid(key) {
+            Some(key) => match is_valid(key).await {
                 Ok(claims) => Outcome::Success(JWT {claims}),
                 Err(err) => match &err.kind() {
                     jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
@@ -58,20 +71,44 @@ impl<'r> FromRequest<'r> for JWT {
     }
 }
 
-    fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
-        //let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
+   async fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
+        let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
         let token = token.trim_start_matches("Bearer").trim();
 
+
+
+        /*
         let mut pem = Vec::new();
         File::open("rsapk.pem")
             .expect("Unable to open PEM file")
             .read_to_end(&mut pem)
             .expect("Unable to read PEM file");
+        */
+        // Effectuer une requête HTTP pour obtenir le PEM
+        let jwk_set  = match get("http://localhost:8083/realms/ecommerce/protocol/openid-connect/certs").await {
+            Ok(response) => response,
+            Err(err) => {
+                println!("Error fetching PEM file: {:?}", err);
+                return Err(ErrorKind::InvalidToken);
+            }   
+        };
+
+        let jwk_json : JwkSet  = match jwk_set.json().await {
+            Ok(response) => response,
+            Err(err) => {
+                println!("Error fetching to JSON file: {:?}", err);
+                return Err(ErrorKind::InvalidToken);
+            }   
+        };
+
+       // let pem = response.as_bytes();
+       let jwk = &jwk_json.keys[0];
 
         // 👇 New!
         match decode::<Claims>(
             &token,
-            &DecodingKey::from_rsa_pem(&pem).unwrap(),
+            //&DecodingKey::from_jwk(&pem).unwrap(),
+            &DecodingKey::from_rsa_components(&jwk.n, &jwk.e).unwrap(),
             &Validation::new(Algorithm::RS256),
         ) {
             Ok(token) => Ok(token.claims),
