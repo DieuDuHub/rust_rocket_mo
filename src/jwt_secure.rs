@@ -16,16 +16,16 @@ use std::env;
 
 #[derive(Debug)]
 pub struct JWT {
-    pub claims: Claims
+    pub claims: Claims,
 }
 
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize,Debug,Serialize)]
 struct Jwk {
     n: String,
     e: String,
 }
 
-#[derive(Deserialize,Debug)]
+#[derive(Deserialize,Debug,Serialize)]
 struct JwkSet {
     keys: Vec<Jwk>,
 }
@@ -72,20 +72,12 @@ impl<'r> FromRequest<'r> for JWT {
 }
 
    async fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
-        let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
+       
         let token = token.trim_start_matches("Bearer").trim();
 
-
-
-        /*
-        let mut pem = Vec::new();
-        File::open("rsapk.pem")
-            .expect("Unable to open PEM file")
-            .read_to_end(&mut pem)
-            .expect("Unable to read PEM file");
-        */
-        // Effectuer une requête HTTP pour obtenir le PEM
-        let jwk_set  = match get("http://localhost:8083/realms/ecommerce/protocol/openid-connect/certs").await {
+        let secret = env::var("JWT_HOST").expect("JWT_HOST must be set.");
+        // Effectuer une requête HTTP pour obtenir le Certs
+        let jwk_set  = match get(format!("{}{}{}","http://",secret,"/realms/ecommerce/protocol/openid-connect/certs")).await {
             Ok(response) => response,
             Err(err) => {
                 println!("Error fetching PEM file: {:?}", err);
@@ -145,5 +137,5 @@ pub struct Response {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub iat: i32,
-    scope: String
+    scope: String,
 }
