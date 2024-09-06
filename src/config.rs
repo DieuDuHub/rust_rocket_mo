@@ -9,7 +9,7 @@ pub async fn init_configuration(filepath: String) -> Result<config::Config, Stri
     let o = match env::var("PROXY_URL") {
         Ok(o) => o,
         Err(e) => {
-            return Err(format!("PROXY_URL path missing: {}. Should be like export PROXY_URL=localhost:8081/config/getconfigfile/mo-config/back-mo/infra.toml or http://localhost:8888/rustmo/default/main/rustmo.properties if using JAva Config Server", e));
+            return Err(format!("PROXY_URL path missing: {}. Should be like export PROXY_URL=localhost:8081/config/getconfigfile/mo-config/back-mo/infra.toml or http://localhost:8888/rustmo/default/main/rustmo.toml if using JAva Config Server", e));
         }
     };
 

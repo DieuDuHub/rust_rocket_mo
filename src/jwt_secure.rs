@@ -77,7 +77,8 @@ impl<'r> FromRequest<'r> for JWT {
 
         let secret = env::var("JWT_HOST").expect("JWT_HOST must be set.");
         // Effectuer une requête HTTP pour obtenir le Certs
-        let jwk_set  = match get(format!("{}{}{}","http://",secret,"/realms/ecommerce/protocol/openid-connect/certs")).await {
+        println!("JWT URL : {}",secret);
+        let jwk_set  = match get(format!("{}{}","http://",secret)).await {
             Ok(response) => response,
             Err(err) => {
                 println!("Error fetching PEM file: {:?}", err);
