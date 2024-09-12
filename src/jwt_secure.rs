@@ -77,7 +77,7 @@ impl<'r> FromRequest<'r> for JWT {
 
         let secret = env::var("JWT_HOST").expect("JWT_HOST must be set.");
         // Effectuer une requête HTTP pour obtenir le Certs
-        println!("JWT URL : {}",secret);
+        //println!("JWT URL : {}",secret);
         let jwk_set  = match get(format!("{}{}","http://",secret)).await {
             Ok(response) => response,
             Err(err) => {
@@ -93,6 +93,8 @@ impl<'r> FromRequest<'r> for JWT {
                 return Err(ErrorKind::InvalidToken);
             }   
         };
+
+       // println!("Bearer {}",&token);
 
        // let pem = response.as_bytes();
        let jwk = &jwk_json.keys[0];
